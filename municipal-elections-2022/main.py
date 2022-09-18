@@ -1,5 +1,3 @@
-from audioop import reverse
-from xmlrpc.client import DateTime
 import requests
 import os
 import argparse
@@ -11,10 +9,10 @@ from dataclasses import dataclass
 ##### CLASSES #####
 @dataclass
 class Obec:
-    timestamp: datetime = DateTime(0)
+    timestamp: datetime = date.min
     code: str = ""
     name: str = ""
-    councillor_amount: int = 0
+    councilor_amount: int = 0
     final: bool = False
 
 @dataclass
@@ -23,8 +21,8 @@ class VolebniStrana:
     name: str = ""
     votes: int = 0
     candidates_amount: int = 0
-    councillor_amount: int = 0
-    councillor_amount_calc: int = 0
+    councilor_amount: int = 0
+    councilor_amount_calc: int = 0
 
 @dataclass
 class Ucast:
@@ -64,12 +62,12 @@ def download_statement(org: str):
 
 
 def fill_obec(root, data):
-    data.timestamp = DateTime(root.attrib['DATUM_CAS_GENEROVANI'])
+    data.timestamp = datetime.fromisoformat(root.attrib['DATUM_CAS_GENEROVANI'])
     el = root.find('.//base:OBEC', ns)
     if el is not None:
         data.code = el.attrib['KODZASTUP']
         data.name = el.attrib['NAZEVZAST']
-        data.councillor_amount = int(el.attrib['VOLENO_ZASTUP'])
+        data.councilor_amount = int(el.attrib['VOLENO_ZASTUP'])
         data.final = False if el.attrib['JE_SPOCTENO'] == 'false' else True
     
 
@@ -91,7 +89,7 @@ def fill_volebni_strany(root):
         party.name = el.attrib['NAZEV_STRANY']
         party.votes = int(el.attrib['HLASY'])
         party.candidates_amount = int(el.attrib['KANDIDATU_POCET'])
-        party.councillor_amount = int(el.attrib['ZASTUPITELE_POCET'])
+        party.councilor_amount = int(el.attrib['ZASTUPITELE_POCET'])
         parties.append(party)
     return parties
 
@@ -101,7 +99,7 @@ def calc_election_step_A(municipality, voted, parties):
     pct = 5
     while True:
         for party in parties:
-            base = voted.valid_votes / municipality.councillor_amount * min(municipality.councillor_amount, party.candidates_amount)
+            base = voted.valid_votes / municipality.councilor_amount * min(municipality.councilor_amount, party.candidates_amount)
             if party.votes > 0:
                 ratio = party.votes / base * 100
             else:
@@ -133,18 +131,18 @@ def calc_election_step_C(ratios, parties):
 def calc_election_step_D(ratios, parties, municipality, voted):
     if voted.district_parts_processed == 0:
         return
-    mandates_ratios = ratios[:municipality.councillor_amount]
+    mandates_ratios = ratios[:municipality.councilor_amount]
     for party in parties:
-        party.councillor_amount_calc = sum(1 for key,value in mandates_ratios if value == party.order)
-        # print(f"{party.name}: {party.councillor_amount_calc} / {party.councillor_amount}")
+        party.councilor_amount_calc = sum(1 for key,value in mandates_ratios if value == party.order)
+        # print(f"{party.name}: {party.councilor_amount_calc} / {party.councilor_amount}")
 
 
 def print_mandates_amount(parties):
-    parties.sort(key=lambda x:x.councillor_amount_calc, reverse=True)
+    parties.sort(key=lambda x:x.councilor_amount_calc, reverse=True)
     print("Mandates   M.Off.   Party")
     print("--------   ------   -----")
     for party in parties:
-        print(f"{party.councillor_amount_calc:>8}   {party.councillor_amount:>6}   {party.name}")
+        print(f"{party.councilor_amount_calc:>8}   {party.councilor_amount:>6}   {party.name}")
 
 if __name__ == "__main__":
 
