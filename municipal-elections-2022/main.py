@@ -177,7 +177,7 @@ if __name__ == "__main__":
     ratios = calc_election_step_C(votes_ratios, scrutiny_parties)
     mandates = calc_election_step_D(ratios, scrutiny_parties, data_municipality, data_voted)
 
-    str_final = " UNCOMPLETE RESULTS"
+    str_final = " INCOMPLETE RESULTS"
     if data_municipality.final:
         str_final = " FINAL RESULTS"
     print(f"\nCalculated municipal elections results for {data_municipality.name}")
