@@ -165,15 +165,19 @@ if __name__ == "__main__":
     print(f"Using org id: {org_id}")
 
     print("Downloading xml from volby.cz ...")
-    xml_response = download_statement(org_id, args.previous)
-    root = ElementTree.fromstring(xml_response)
-    data_municipality = Municipality()
-    data_voted = Turnout()
-    print("Parsing input xml data...")
-    fill_municipality(root, data_municipality)
-    fill_turnout(root, data_voted)
-    data_parties = fill_political_parties(root)
-    
+    try:
+        xml_response = download_statement(org_id, args.previous)
+        root = ElementTree.fromstring(xml_response)
+        data_municipality = Municipality()
+        data_voted = Turnout()
+        print("Parsing input xml data...")
+        fill_municipality(root, data_municipality)
+        fill_turnout(root, data_voted)
+        data_parties = fill_political_parties(root)
+    except Exception as e:
+        print(f"Error: {e}")
+        exit(1)
+
     ## data are prepared, we can calculate election results
     print("Calculating election results...")
     scrutiny_parties = calc_election_step_A(data_municipality, data_voted, data_parties)
