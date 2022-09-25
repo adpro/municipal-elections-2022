@@ -1,5 +1,6 @@
 import requests
 import argparse
+import time
 from xml.etree import ElementTree
 
 
@@ -58,10 +59,16 @@ if __name__ == "__main__":
         if batch_min > batch_max:
             batch_min = 1
         for i in range(batch_min, batch_max+1):
-            print(f"Downloading batch id={i}...")
-            xml = download_batch(i)
-            if contains_org(org_id, xml):
-                org_batches.append(xml)
+            while True:
+                try:
+                    print(f"Downloading batch id={i}...")
+                    xml = download_batch(i)
+                    if contains_org(org_id, xml):
+                        org_batches.append(xml)
+                    break
+                except:
+                    print("Error downloading batch.. Retry..")
+                    time.sleep(3)
         print(f"Amount of batches with org_id: {len(org_batches)}.")
     except requests.exceptions.ConnectionError as e:
         print("Error in downloading data!")
