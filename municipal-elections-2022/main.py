@@ -190,7 +190,7 @@ if __name__ == "__main__":
     if data_municipality.final:
         str_final = " FINAL RESULTS"
     print(f"\nCalculated municipal elections results for {data_municipality.name}")
-    print(f"Timestamp: {data_municipality.timestamp}, district parts {data_voted.polling_divisions_processed}/{data_voted.polling_divisions}{str_final}:")
+    print(f"Timestamp: {data_municipality.timestamp}, polling districts {data_voted.polling_divisions_processed}/{data_voted.polling_divisions}{str_final}:")
     print("="*80)
     print_mandates_amount(data_parties)
 
